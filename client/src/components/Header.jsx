@@ -134,7 +134,61 @@ const Header = () => {
         </Dialog>
       </Transition.Root>
 
-      <div className="flex flex-col flex-1">
+      {/* Static sidebar for desktop */}
+      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
+        <div className="flex flex-col flex-grow bg-cyan-700 pt-5 pb-4 overflow-y-auto">
+          <div className="flex items-center flex-shrink-0 px-4">
+            <span className="h-8 w-auto text-xl text-white font-bold">
+              Buscador de oficios
+            </span>
+          </div>
+          <nav
+            className="mt-5 flex-1 flex flex-col divide-y divide-cyan-800 overflow-y-auto"
+            aria-label="Sidebar"
+          >
+            <div className="px-2 space-y-1">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.link}
+                  className={classNames(
+                    item.current
+                      ? 'bg-cyan-800 text-white'
+                      : 'text-cyan-100 hover:text-white hover:bg-cyan-600',
+                    'group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md cursor-pointer'
+                  )}
+                  aria-current={item.current ? 'page' : undefined}
+                >
+                  <item.icon
+                    className="mr-4 flex-shrink-0 h-6 w-6 text-cyan-200"
+                    aria-hidden="true"
+                  />
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            <div className="mt-6 pt-6">
+              <div className="px-2 space-y-1">
+                {secondaryNavigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.link}
+                    className="group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md text-cyan-100 hover:text-white hover:bg-cyan-600 cursor-pointer"
+                  >
+                    <item.icon
+                      className="mr-4 h-6 w-6 text-cyan-200"
+                      aria-hidden="true"
+                    />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <div className="flex flex-col flex-1 lg:pl-64">
         <div className="relative z-10 flex-shrink-0 flex h-16 bg-white border-b border-gray-200 lg:border-none">
           <button
             type="button"
