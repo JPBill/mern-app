@@ -17,7 +17,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
-          </Route>{' '}
+          </Route>
         </Routes>
       </BrowserRouter>
     </>
