@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import {
+  logOutUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+} from '../redux/user/userSlice';
+import { useDispatch } from 'react-redux';
+import {
   UserIcon,
   CogIcon,
   HomeIcon,
@@ -28,6 +34,23 @@ function classNames(...classes) {
 const Header = () => {
   const { currentUser } = useSelector((state) => state.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const handleLogOut = async () => {
+    try {
+      dispatch(logOutUserStart());
+      const res = await fetch('/server/auth/logout');
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  };
 
   return (
     <div className="min-h-full">
@@ -278,6 +301,7 @@ const Header = () => {
                         {({ active }) => (
                           <Link
                             to="/"
+                            onClick={handleLogOut}
                             className={classNames(
                               active ? 'bg-gray-100' : '',
                               'block px-4 py-2 text-sm text-gray-700'
