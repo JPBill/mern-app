@@ -1,9 +1,47 @@
-import { LockClosedIcon, MailIcon, UserIcon } from '@heroicons/react/outline';
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+} from '../redux/user/userSlice';
+import { LockClosedIcon, MailIcon, UserIcon } from '@heroicons/react/outline';
 
 const Profile = () => {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
+  const [formData, setFormData] = useState({});
+  const [updateSucess, setUpdateSuccess] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/server/user/update/${currentUser._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+    }
+  };
 
   return (
     <div className="min-h-full">
@@ -48,7 +86,10 @@ const Profile = () => {
               <h4 className="text-lg leading-6 font-medium text-gray-900">
                 Editar perfil
               </h4>
-              <form className="divide-y divide-gray-200">
+              <form
+                onSubmit={handleSubmit}
+                className="divide-y divide-gray-200"
+              >
                 <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
                   <label
                     htmlFor="username"
@@ -61,6 +102,7 @@ const Profile = () => {
                       type="text"
                       id="username"
                       name="username"
+                      onChange={handleChange}
                       defaultValue={currentUser.username}
                       required
                       className="flex-grow px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
@@ -84,6 +126,7 @@ const Profile = () => {
                       type="email"
                       id="email"
                       name="email"
+                      onChange={handleChange}
                       defaultValue={currentUser.email}
                       required
                       className="flex-grow px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
@@ -106,6 +149,7 @@ const Profile = () => {
                       type="password"
                       id="password"
                       name="password"
+                      onChange={handleChange}
                       required
                       className="flex-grow px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
                     />
@@ -115,15 +159,24 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
+                <div className="flex justify-start p-4">
+                  <p className="text-red-700">{error ? error : ''}</p>
+                  <p className="text-green-700">
+                    {updateSucess ? 'Usuario actualizado éxitosamente' : ''}
+                  </p>
+                </div>
+                <div className="py-4 flex flex-col md:flex-row justify-center md:justify-end">
+                  <button className="w-full md:w-48 border border-red-300 shadow-sm py-2 px-3 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-gray-50 focus:outline-none">
+                    Eliminar cuenta
+                  </button>
+                  <button
+                    disabled={loading}
+                    className="ml-0 mt-2 md:mt-0 md:ml-5 w-full md:w-48 bg-cyan-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none"
+                  >
+                    {loading ? 'Cargando...' : 'Guardar cambios'}
+                  </button>
+                </div>
               </form>
-              <div className="py-4 flex flex-col md:flex-row justify-center md:justify-end">
-                <button className="w-full md:w-48 border border-red-300 shadow-sm py-2 px-3 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-gray-50 focus:outline-none">
-                  Eliminar cuenta
-                </button>
-                <button className="ml-0 mt-2 md:mt-0 md:ml-5 w-full md:w-48 bg-cyan-700 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">
-                  Guardar cambios
-                </button>
-              </div>
             </div>
           </div>
         </main>
