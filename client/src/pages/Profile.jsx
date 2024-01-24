@@ -5,6 +5,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from '../redux/user/userSlice';
 import { LockClosedIcon, MailIcon, UserIcon } from '@heroicons/react/outline';
 
@@ -17,6 +20,23 @@ const Profile = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/server/user/delete/${currentUser._id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -166,7 +186,10 @@ const Profile = () => {
                   </p>
                 </div>
                 <div className="py-4 flex flex-col md:flex-row justify-center md:justify-end">
-                  <button className="w-full md:w-48 border border-red-300 shadow-sm py-2 px-3 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-gray-50 focus:outline-none">
+                  <button
+                    onClick={handleDeleteUser}
+                    className="w-full md:w-48 border border-red-300 shadow-sm py-2 px-3 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-gray-50 focus:outline-none"
+                  >
                     Eliminar cuenta
                   </button>
                   <button
