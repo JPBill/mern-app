@@ -30,6 +30,24 @@ const Profile = () => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  const handleListingDelete = async (listingId) => {
+    try {
+      const res = await fetch(`/server/listing/delete/${listingId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+      setUserListing((prevData) =>
+        prevData.filter((listing) => listing._id !== listingId)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   const handleShowListing = async () => {
     try {
       setShowListingError(false);
@@ -206,6 +224,9 @@ const Profile = () => {
                                   <Menu.Item>
                                     {({ active }) => (
                                       <button
+                                        onClick={() =>
+                                          handleListingDelete(listing._id)
+                                        }
                                         className={classNames(
                                           active
                                             ? 'text-red-700'
