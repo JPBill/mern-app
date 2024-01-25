@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import PrivateRoute from './pages/PrivateRoute';
 import AddWorker from './pages/AddWorker';
+import UpdateWorkerListing from './pages/UpdateWorkerListing';
 import Header from './components/Header';
 
 function App() {
@@ -19,6 +20,10 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/add-worker" element={<AddWorker />} />
+            <Route
+              path="/update-worker/:listingId"
+              element={<UpdateWorkerListing />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>

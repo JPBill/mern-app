@@ -209,7 +209,7 @@ const Profile = () => {
                                   <Menu.Item>
                                     {({ active }) => (
                                       <Link
-                                        to="/"
+                                        to={`/update-worker/${listing._id}`}
                                         className={classNames(
                                           active
                                             ? 'bg-gray-100 text-gray-900'
@@ -276,7 +276,6 @@ const Profile = () => {
                       id="username"
                       name="username"
                       onChange={handleChange}
-                      defaultValue={currentUser.username}
                       required
                       className="flex-grow px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
                     />
