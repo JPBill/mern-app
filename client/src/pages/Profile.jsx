@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
@@ -10,16 +10,40 @@ import {
   deleteUserFailure,
 } from '../redux/user/userSlice';
 import { LockClosedIcon, MailIcon, UserIcon } from '@heroicons/react/outline';
+import { Menu, Transition } from '@headlessui/react';
+import { DotsVerticalIcon } from '@heroicons/react/solid';
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
 
 const Profile = () => {
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
   const [updateSucess, setUpdateSuccess] = useState(false);
+  const [showListingError, setShowListingError] = useState(false);
+  const [userListing, setUserListing] = useState([]);
 
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleShowListing = async () => {
+    try {
+      setShowListingError(false);
+      const res = await fetch(`/server/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (data.success === false) {
+        setShowListingError(true);
+        return;
+      }
+      setUserListing(data);
+      console.log(data);
+    } catch (error) {
+      setShowListingError(true);
+    }
   };
 
   const handleDeleteUser = async () => {
@@ -85,7 +109,7 @@ const Profile = () => {
                 </div>
                 <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
                   <button
-                    type="button"
+                    onClick={handleShowListing}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
                   >
                     Mis añadidos
@@ -98,9 +122,117 @@ const Profile = () => {
                   </Link>
                 </div>
               </div>
+              <p className="text-red-700 text-center mt-3">
+                {showListingError ? 'Error al mostrar el listado' : ''}
+              </p>
+              {userListing && userListing.length > 0 ? (
+                <div className="pb-4 ">
+                  <ul
+                    role="list"
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6"
+                  >
+                    {userListing.map((listing) => (
+                      <li
+                        key={listing._id}
+                        className="relative col-span-1 flex shadow-sm rounded-md p-4 border border-gray-200"
+                      >
+                        <div className="w-16 h-16">
+                          <img
+                            src={listing.image}
+                            className="h-full w-full object-cover rounded-md p-2"
+                            alt={listing.animal}
+                          />
+                        </div>
+                        <div className="flex-1 flex items-center justify-between truncate">
+                          <div className="flex-1 px-4 py-2 text-sm truncate">
+                            <p className="text-sm font-medium text-gray-500 truncate">
+                              {listing.name}
+                            </p>
+                            <p className="text-lg font-medium text-gray-900">
+                              {listing.category}
+                            </p>
+                          </div>
+                          <Menu as="div" className="flex-shrink-0 pr-2">
+                            <Menu.Button className="w-8 h-8 bg-white inline-flex items-center justify-center text-gray-400 rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                              <span className="sr-only">Open options</span>
+                              <DotsVerticalIcon
+                                className="w-5 h-5"
+                                aria-hidden="true"
+                              />
+                            </Menu.Button>
+                            <Transition
+                              as={Fragment}
+                              enter="transition ease-out duration-100"
+                              enterFrom="transform opacity-0 scale-95"
+                              enterTo="transform opacity-100 scale-100"
+                              leave="transition ease-in duration-75"
+                              leaveFrom="transform opacity-100 scale-100"
+                              leaveTo="transform opacity-0 scale-95"
+                            >
+                              <Menu.Items className="z-10 mx-3 origin-top-right absolute right-10 top-3 w-48 mt-1 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 focus:outline-none">
+                                <div className="py-1">
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <Link
+                                        to="/"
+                                        className={classNames(
+                                          active
+                                            ? 'bg-gray-100 text-gray-900'
+                                            : 'text-gray-700',
+                                          'block px-4 py-2 text-sm'
+                                        )}
+                                      >
+                                        Ver más
+                                      </Link>
+                                    )}
+                                  </Menu.Item>
+                                </div>
+                                <div className="py-1">
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <Link
+                                        to="/"
+                                        className={classNames(
+                                          active
+                                            ? 'bg-gray-100 text-gray-900'
+                                            : 'text-gray-700',
+                                          'block px-4 py-2 text-sm'
+                                        )}
+                                      >
+                                        Editar
+                                      </Link>
+                                    )}
+                                  </Menu.Item>
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <button
+                                        className={classNames(
+                                          active
+                                            ? 'text-red-700'
+                                            : 'text-gray-700',
+                                          'block px-4 py-2 text-sm'
+                                        )}
+                                      >
+                                        Eliminar
+                                      </button>
+                                    )}
+                                  </Menu.Item>
+                                </div>
+                              </Menu.Items>
+                            </Transition>
+                          </Menu>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
 
+          {/* Edit user profile section */}
           <div className="mt-8">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-1">
               <h4 className="text-lg leading-6 font-medium text-gray-900">
